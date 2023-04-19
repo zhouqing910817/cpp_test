@@ -1,0 +1,16 @@
+#!/usr/bin/expect -f
+
+
+set ip [ lindex $argv 0 ]
+
+set passwd [ lindex $argv 1 ]
+
+set timeout 10
+
+spawn ssh-copy-id -i /root/.ssh/id_rsa root@$ip
+
+expect "yes/no" {send "yes\r";exp_continue}
+
+expect "password:" {send "$passwd\r"}
+
+interact
