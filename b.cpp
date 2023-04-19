@@ -11,3 +11,6 @@ void f()
 {
     std::cout << "a: " << a << " b:" << b << std::endl;
 }
+
+int main(int argc, char* argv) {
+}
