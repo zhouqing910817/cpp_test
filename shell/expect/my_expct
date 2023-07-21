@@ -1,0 +1,9 @@
+#!/usr/bin/expect
+set ip [ lindex $argv 0 ]
+set cmd [ lindex $argv 1 ]
+spawn ssh $ip "$cmd \n"
+expect {
+	"yes/no" {send "yes\n";exp_continue}
+	"password" {send "1\n"}
+}
+expect eof

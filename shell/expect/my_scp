@@ -1,0 +1,9 @@
+#!/usr/bin/expect
+set dst1 [ lindex $argv 0 ] 
+set dst2 [ lindex $argv 1 ] 
+spawn scp $dst1 $dst2
+expect {
+    "yes/no" {send "yes\n";exp_continue}
+    "password" {send "1\n"}
+}
+expect eof
