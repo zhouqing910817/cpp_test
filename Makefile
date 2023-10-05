@@ -5,7 +5,7 @@ BIN = $(SRC:%.cpp=%)
 all : ${BIN}
 
 ${BIN}:%:%.cpp
-	${CC} $^ -O2 -o $@ -lboost_thread -pthread -lbfd
+	${CC} $^ -O2 -o $@ -lboost_thread -pthread -lbfd --std=c++14
  
 clean:
 	rm -rf ${BIN}
