@@ -19,7 +19,7 @@ int main() {
     strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S.", &local_time);
 
     // Add microseconds
-    sprintf(timestamp + strlen(timestamp), "%06ld", 000);
+    sprintf(timestamp + strlen(timestamp), "%06ld", (int64_t)000);
 
     // Include the UTC offset
     strftime(timestamp + strlen(timestamp), sizeof(timestamp) - strlen(timestamp), "%z", &local_time);

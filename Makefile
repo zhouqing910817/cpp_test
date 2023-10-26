@@ -1,13 +1,19 @@
 CC = g++
 SRC = $(wildcard *.cpp)
-BIN = $(SRC:%.cpp=%)
- 
-all : ${BIN}
+OBJ = $(addprefix out/,$(SRC:%.cpp=%.o))
+EXECUTABLES = $(OBJ:%.o=%)
 
-${BIN}:%:%.cpp
-	${CC} $^ -O2 -o $@ -lboost_thread -lrt -pthread -lbfd --std=c++14
- 
+all: $(EXECUTABLES)
+
+out/%.o: %.cpp
+	@if [ ! -d out ]; then mkdir out; fi;
+	$(CC) -c $< -o $@ --std=c++14
+
+$(EXECUTABLES): %: %.o
+	@if [ ! -d out ]; then mkdir out; fi;
+	$(CC) $< -o $@ -lboost_thread -lrt -pthread -lbfd --std=c++14
+
 clean:
-	rm -rf ${BIN}
- 
+	rm -rf out $(EXECUTABLES)
+
 .PHONY: all clean
