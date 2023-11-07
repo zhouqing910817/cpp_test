@@ -22,6 +22,6 @@ run:
 	done
 
 clean:
-	rm -rf out $(EXECUTABLES)
+	rm -rf out
 
 .PHONY: all clean
