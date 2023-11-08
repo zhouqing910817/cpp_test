@@ -17,10 +17,6 @@ public:
     int size() {
         return int(pptr() - pbase());
     }
-    const char* c_str() {
-        *pptr() = '\0';
-        return (char*)pbase();
-    }
 
     int flushBuffer() {
         int len = int(pptr() - pbase());
