@@ -133,7 +133,9 @@ public:
         std::tm* timeInfo = std::localtime(&currentTime);
 
         // 输出
-        (*log_stream_ptr) << level_color_start<level>() << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.' << microseconds << " " << get_thread_id() << " " << level_str<level>() << " ";
+        constexpr const char* color_start_str =level_color_start<level>();
+        constexpr const char* level_c_str = level_str<level>();
+        (*log_stream_ptr) << color_start_str << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.' << microseconds << " " << get_thread_id() << " " << level_c_str << " ";
     }
     FormatHelper(const FormatHelper& h) = default;
     ~FormatHelper() {
