@@ -1,4 +1,21 @@
 #include <iostream>
+template<int LEVEL>
+constexpr char* level_str() {
+    switch (LEVEL) {
+        case 1:
+            return "E";
+        case 2:
+            return "I";
+        case 3:
+            return "D";
+        case 4:
+            return "W";
+        default:
+            return "unknown";
+    }
+}
+
+
 constexpr int strlen_my(const char* str) {
     if (str == nullptr) return 0;
     int index = 0;
@@ -29,5 +46,7 @@ int main()
     constexpr int a = 3;
     constexpr int b = 5;
     static_assert(add(a,b) == 8, "add() should be evaluated at compile-time");
+    static_assert(level_str<1>() == "E", "level_str<1>");
+    std::cout << level_str<1>() << std::endl;
     return 0;
 }

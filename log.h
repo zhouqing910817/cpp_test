@@ -10,6 +10,9 @@
 #include <iostream>
 #include <thread>
 
+#define LIKELY(x)      __builtin_expect(!!(x), 1)
+#define UN_LIKELY(x)    __builtin_expect(!!(x), 0)
+
 class LogStreamBuf : public std::streambuf {
 public:
     LogStreamBuf() {
@@ -103,7 +106,7 @@ constexpr const char* level_color_end() {
 inline const char* get_thread_id() {
     thread_local const char* t_id_c_str = nullptr;
     thread_local std::string t_id;
-    if (t_id.size() == 0) {
+    if (UN_LIKELY(t_id.size() == 0)) {
         std::stringstream ss;
         ss << std::this_thread::get_id();
         t_id = std::move(ss.str());
