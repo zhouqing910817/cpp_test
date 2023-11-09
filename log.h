@@ -8,6 +8,7 @@
 #include <streambuf>
 #include <ostream>
 #include <iostream>
+#include <thread>
 
 class LogStreamBuf : public std::streambuf {
 public:
@@ -68,12 +69,17 @@ private:
 
 template<int LEVEL>
 constexpr const char* level_str() {
-    if (LEVEL == ERROR_LEVEL) {
-        return "E";
-    } else if (INFO_LEVEL == 2) {
-        return "I";
-    } else {
-        return "unknown";
+    switch (LEVEL) {
+        case ERROR_LEVEL:
+            return "E";
+        case INFO_LEVEL:
+            return "I";
+        case DEBUG_LEVEL:
+            return "D";
+        case WARN_LEVEL:
+            return "W";
+        default:
+            return "unknown";
     }
 }
 
@@ -93,6 +99,20 @@ constexpr const char* level_color_end() {
     }
     return "";
 }
+
+inline const char* get_thread_id() {
+    thread_local const char* t_id_c_str = nullptr;
+    thread_local std::string t_id;
+    if (t_id.size() == 0) {
+        std::stringstream ss;
+        ss << std::this_thread::get_id();
+        t_id = std::move(ss.str());
+        t_id_c_str = t_id.c_str();
+    }
+    return t_id_c_str;
+}
+
+
 template<int level>
 class FormatHelper {
 public:
@@ -110,7 +130,7 @@ public:
         std::tm* timeInfo = std::localtime(&currentTime);
 
         // 输出
-        (*log_stream_ptr) << level_color_start<level>() << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.' << microseconds << " " << level_str<level>() << " ";
+        (*log_stream_ptr) << level_color_start<level>() << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.' << microseconds << " " << get_thread_id() << " " << level_str<level>() << " ";
     }
     FormatHelper(const FormatHelper& h) = default;
     ~FormatHelper() {
