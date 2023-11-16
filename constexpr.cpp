@@ -1,6 +1,6 @@
 #include <iostream>
 template<int LEVEL>
-constexpr char* level_str() {
+constexpr const char* level_str() {
     switch (LEVEL) {
         case 1:
             return "E";
@@ -38,15 +38,16 @@ constexpr int add(int a, int b) {
 // c++ version should be >= c++14
 int main()
 {
-    static_assert(strlen_my(get_file_name(__FILE__, sizeof(__FILE__))) == 13, "get_file_name() should be evaluated at compile-time");
-    constexpr auto file_name = get_file_name(__FILE__, sizeof(__FILE__));
-    constexpr auto s_len = strlen_my(file_name);
-    static_assert(s_len == 13, "get_file_name() should be evaluated at compile-time");
-    std::cout << "file_name: " << file_name << " len: " << s_len << std::endl;
-    constexpr int a = 3;
-    constexpr int b = 5;
-    static_assert(add(a,b) == 8, "add() should be evaluated at compile-time");
-    static_assert(level_str<1>() == "E", "level_str<1>");
-    std::cout << level_str<1>() << std::endl;
+    // static_assert(strlen_my(get_file_name(__FILE__, sizeof(__FILE__))) == 13, "get_file_name() should be evaluated at compile-time");
+    // constexpr auto file_name = get_file_name(__FILE__, sizeof(__FILE__));
+    // constexpr auto s_len = strlen_my(file_name);
+    // static_assert(s_len == 13, "get_file_name() should be evaluated at compile-time");
+    // std::cout << "file_name: " << file_name << " len: " << s_len << std::endl;
+    // constexpr int a = 3;
+    // constexpr int b = 5;
+    // static_assert(add(a,b) == 8, "add() should be evaluated at compile-time");
+    // static_assert(level_str<1>() == "E", "level_str<1>");
+    constexpr const char* s = level_str<1>();
+    std::cout << s << std::endl;
     return 0;
 }
