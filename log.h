@@ -68,6 +68,7 @@ private:
 #define DEBUG_LEVEL 3
 
 #define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
 #define CLEAR "\033[0m"
 
 template<int LEVEL>
@@ -92,12 +93,15 @@ constexpr const char* level_color_start() {
     if (LEVEL == ERROR_LEVEL) {
         return RED;
     }
+    if (LEVEL == INFO_LEVEL) {
+        return GREEN;
+    }
     return "";
 }
 
 template<int LEVEL>
 constexpr const char* level_color_end() {
-    if (LEVEL == ERROR_LEVEL) {
+    if (LEVEL == ERROR_LEVEL || LEVEL == INFO_LEVEL) {
         return CLEAR;
     }
     return "";
@@ -140,7 +144,8 @@ public:
     FormatHelper(const FormatHelper& h) = default;
     ~FormatHelper() {
         // std::cout << "=====" << "~Helper()" << "====" << std::endl;
-        (*log_stream_ptr) << level_color_end<level>() << "\n";
+        constexpr const char* color_end_str = level_color_end<level>();
+        (*log_stream_ptr) << color_end_str << "\n";
     }
 
     template<typename T>
