@@ -23,5 +23,7 @@ int main() {
     LOG(INFO) << "i am INFO";
     LOG(ERROR) << "i am ERROR";
     LOG(INFO) << "i am INFO again";
+    LOG(DEBUG) << "i am debug";
+    LOG(WARN) << "i am warn";
     return 0;
 }
