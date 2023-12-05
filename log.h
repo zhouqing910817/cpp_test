@@ -13,6 +13,8 @@
 #define LIKELY(x)      __builtin_expect(!!(x), 1)
 #define UN_LIKELY(x)    __builtin_expect(!!(x), 0)
 
+#define USE_COLOR
+
 class LogStreamBuf : public std::streambuf {
 public:
     LogStreamBuf() {
@@ -69,6 +71,7 @@ private:
 
 #define RED "\033[1;31m"
 #define GREEN "\033[1;32m"
+#define YELLOW "\033[1;33m"
 #define CLEAR "\033[0m"
 
 template<int LEVEL>
@@ -96,7 +99,7 @@ constexpr const char* level_color_start() {
     if (LEVEL == INFO_LEVEL) {
         return GREEN;
     }
-    return "";
+    return YELLOW;
 }
 
 template<int LEVEL>
@@ -119,7 +122,6 @@ inline const char* get_thread_id() {
     return t_id_c_str;
 }
 
-
 template<int level>
 class FormatHelper {
 public:
@@ -137,15 +139,27 @@ public:
         std::tm* timeInfo = std::localtime(&currentTime);
 
         // 输出
+#ifdef USE_COLOR
         constexpr const char* color_start_str = level_color_start<level>();
+#endif
         constexpr const char* level_c_str = level_str<level>();
-        (*log_stream_ptr) << color_start_str << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.' << microseconds << " " << get_thread_id() << " " << level_c_str << " ";
+        (*log_stream_ptr)
+#ifdef USE_COLOR
+            << color_start_str
+#endif
+            << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.' << microseconds << " " << get_thread_id() << " " << level_c_str << " ";
     }
     FormatHelper(const FormatHelper& h) = default;
     ~FormatHelper() {
         // std::cout << "=====" << "~Helper()" << "====" << std::endl;
+#ifdef USE_COLOR
         constexpr const char* color_end_str = level_color_end<level>();
-        (*log_stream_ptr) << color_end_str << "\n";
+#endif
+        (*log_stream_ptr)
+#ifdef USE_COLOR
+            << color_end_str
+#endif
+            << "\n";
     }
 
     template<typename T>
