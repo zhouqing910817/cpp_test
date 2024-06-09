@@ -14,16 +14,37 @@ std::ostream& operator<< (std::ostream& out, const People& p) {
 }
 
 int main() {
+
     LOG(ERROR) << "Hello," << "world!";
+    
     LOG(ERROR) << "Another message";
 
     People p = {"zhouqing", 18};
-    LOG(ERROR) << p;
+    LOG(ERROR) <<   p;
 
     LOG(INFO) << "i am INFO";
     LOG(ERROR) << "i am ERROR";
     LOG(INFO) << "i am INFO again";
     LOG(DEBUG) << "i am debug";
     LOG(WARN) << "i am warn";
+
+    LOG_T([]() -> bool {
+        static int cnt = 1;
+        if (++cnt >= 10) {
+            return true;
+        }
+        return false;
+    }) << "done";
+        LOG(ERROR) << "Hello," << "world!";
+    
+    LOG(ERROR) << "Another message";
+
+    LOG(ERROR) <<   p;
+    LOG(INFO) << "i am INFO";
+    LOG(ERROR) << "i am ERROR";
+    LOG(INFO) << "i am INFO again";
+    LOG(DEBUG) << "i am debug";
+    LOG(WARN) << "i am warn";
+
     return 0;
 }

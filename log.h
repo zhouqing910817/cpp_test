@@ -54,12 +54,28 @@ class LogStream : public std::ostream {
 public:
     LogStream() : std::ostream(&buf) {}
 
+        // 定义移动构造函数
+    LogStream(LogStream&& other) : std::ostream(std::move(other)), buf(std::move(other.buf)) {}
+
+    // 定义移动赋值运算符
+    LogStream& operator=(LogStream&& other) {
+        if (this != &other) {
+            std::ostream::operator=(std::move(other));
+            buf = std::move(other.buf);
+        }
+        return *this;
+    }
+
     bool empty() {
         return buf.size() <= 0;
     }
     virtual ~LogStream() {
         buf.flushBuffer();
     }
+    void flushBuffer() {
+        buf.flushBuffer();
+    }
+
 private:
     LogStreamBuf buf;
 };
@@ -71,7 +87,7 @@ private:
 
 #define RED "\033[1;31m"
 #define GREEN "\033[1;32m"
-#define YELLOW "\033[1;33m"
+#define YELLOW "\033[1;93m"
 #define CLEAR "\033[0m"
 
 template<int LEVEL>
@@ -125,7 +141,48 @@ inline const char* get_thread_id() {
 template<int level>
 class FormatHelper {
 public:
-    FormatHelper() : log_stream_ptr(std::make_shared<LogStream>()) {
+    FormatHelper(std::function<bool(void)> cb) {
+
+
+        // 输出
+#ifdef USE_COLOR
+        constexpr const char* color_start_str = level_color_start<level>();
+#endif
+        constexpr const char* level_c_str = level_str<level>();
+        int prog = 0;
+        while(!cb()) {
+            auto now = std::chrono::system_clock::now();
+            auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+
+            // 获取微妙部分
+            auto epoch = now_us.time_since_epoch();
+            auto value = std::chrono::duration_cast<std::chrono::microseconds>(epoch);
+            int microseconds = value.count() % 1000000;
+
+            // 转换为时间_t来使用标准库
+            std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+            std::tm* timeInfo = std::localtime(&currentTime);
+            logStream() << "\r"
+#ifdef USE_COLOR
+            << color_start_str
+#endif
+            << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.'
+            << microseconds << " " << get_thread_id() << " " << level_c_str << " "
+            << "[ ";
+            for (int i = 0; i < 3; ++i) {
+                if (i <= prog) logStream() << ". ";
+                else logStream() << "  ";
+            }
+            prog = (prog + 1) % 4;
+            if (prog == 3) {
+                prog = 0;
+            }
+            logStream() << " ] ";
+            std::cout.flush();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
+    }
+    FormatHelper() {
         auto now = std::chrono::system_clock::now();
         auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
 
@@ -143,11 +200,14 @@ public:
         constexpr const char* color_start_str = level_color_start<level>();
 #endif
         constexpr const char* level_c_str = level_str<level>();
-        (*log_stream_ptr)
+        
+        (logStream())
 #ifdef USE_COLOR
             << color_start_str
 #endif
-            << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.' << microseconds << " " << get_thread_id() << " " << level_c_str << " ";
+            << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S") << '.'
+            << microseconds << " " << get_thread_id() << " " << level_c_str << " ";
+        
     }
     FormatHelper(const FormatHelper& h) = default;
     ~FormatHelper() {
@@ -155,21 +215,25 @@ public:
 #ifdef USE_COLOR
         constexpr const char* color_end_str = level_color_end<level>();
 #endif
-        (*log_stream_ptr)
+        (logStream())
 #ifdef USE_COLOR
             << color_end_str
 #endif
             << "\n";
+        logStream().flushBuffer();
     }
 
     template<typename T>
     FormatHelper& operator<<(const T& msg) {
-        (*log_stream_ptr) << msg;
+        (logStream()) << msg;
         return *this;
     }
 
 private:
-    std::shared_ptr<LogStream> log_stream_ptr;
+    inline LogStream& logStream() {
+        static LogStream g_log_stream;
+        return g_log_stream;
+    }
 };
 class Log {
 public:
@@ -177,6 +241,10 @@ public:
     template<int LEVEL>
     static constexpr FormatHelper<LEVEL> getInstance() {
         return FormatHelper<LEVEL>();
+    }
+    template<int LEVEL>
+    static inline FormatHelper<LEVEL> getInstance(std::function<bool(void)> cb) {
+        return FormatHelper<LEVEL>(cb);
     }
 
 private:
@@ -186,3 +254,5 @@ private:
 };
 
 #define LOG(p_level) Log::getInstance<p_level##_LEVEL>()
+
+#define LOG_T(COND) Log::getInstance<INFO##_LEVEL>(COND)

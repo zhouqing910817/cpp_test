@@ -1,3 +1,4 @@
+# usage make run target=log
 CC = g++
 SRC = $(wildcard *.cpp)
 OBJ = $(addprefix out/,$(SRC:%.cpp=%.o))
@@ -11,7 +12,7 @@ out/%.o: %.cpp log.h
 
 $(EXECUTABLES): %: %.o
 	@if [ ! -d out ]; then mkdir out; fi;
-	$(CC) $< -o $@ -lboost_thread -lrt -pthread -lbfd --std=c++14
+	$(CC) $< -o $@ -lboost_thread  -pthread  --std=c++14
 
 #out/$(target): out/$(target).o
 #	$(CC) -c $(target).cpp -o out/$(target).o --std=c++14 -I./
@@ -28,7 +29,7 @@ run: out/$(target)
 	@if [ -z "$(target)" ]; then echo "Please specify the target name."; exit 1; fi;
 	@for file in $(EXECUTABLES); do \
 		if echo $$file | grep -q "$(target)"; then \
-            echo -e "\033[32mrunning '$$file':\033[0m"; \
+            echo "\033[32mrunning '$$file':\033[0m"; \
 		    ./$$file; \
             found=1;  \
             break;   \
